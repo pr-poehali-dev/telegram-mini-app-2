@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -34,6 +34,93 @@ const Index = () => {
   const [balance, setBalance] = useState(0);
   const [showBalanceModal, setShowBalanceModal] = useState(false);
   const [showReferralModal, setShowReferralModal] = useState(false);
+  const [showMatchModal, setShowMatchModal] = useState(false);
+  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+  const [userReferralCode, setUserReferralCode] = useState('');
+  const [referralCount, setReferralCount] = useState(0);
+  const [telegramId] = useState(123456789);
+  const [userPredictions, setUserPredictions] = useState<Prediction[]>([]);
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch(
+        `https://functions.poehali.dev/2d7391fd-c275-4ea4-b473-e73b27b51e63?telegram_id=${telegramId}`
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        setBalance(data.user.balance);
+        setUserReferralCode(data.user.referral_code);
+        setReferralCount(data.referral_count);
+      } else {
+        const createResponse = await fetch(
+          'https://functions.poehali.dev/2d7391fd-c275-4ea4-b473-e73b27b51e63',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              telegram_id: telegramId,
+              username: 'Artem',
+              first_name: 'Artem'
+            })
+          }
+        );
+        
+        if (createResponse.ok) {
+          const data = await createResponse.json();
+          setBalance(data.user.balance);
+          setUserReferralCode(data.user.referral_code);
+          setReferralCount(0);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+
+  const handleMatchClick = (match: Match) => {
+    setSelectedMatch(match);
+    setShowMatchModal(true);
+  };
+
+  const handleMakePrediction = async () => {
+    if (balance < 1) {
+      alert('Недостаточно монет! Пополните баланс.');
+      return;
+    }
+
+    if (selectedMatch) {
+      const newPrediction: Prediction = {
+        id: Date.now(),
+        match: selectedMatch,
+        prediction: 'Прогноз исхода',
+        result: `Победа 1`,
+        opened: new Date().toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
+        status: 'open'
+      };
+
+      setUserPredictions([newPrediction, ...userPredictions]);
+      setBalance(balance - 1);
+      setShowMatchModal(false);
+      setActiveTab('predictions');
+    }
+  };
+
+  const copyReferralLink = () => {
+    const link = `https://t.me/your_bot?start=${userReferralCode}`;
+    navigator.clipboard.writeText(link);
+    alert('Ссылка скопирована!');
+  };
 
   const matches: Match[] = [
     {
@@ -183,7 +270,11 @@ const Index = () => {
 
             <div className="space-y-3">
               {matches.map((match) => (
-                <Card key={match.id} className="p-4 bg-white rounded-2xl border-gray-100">
+                <Card 
+                  key={match.id} 
+                  className="p-4 bg-white rounded-2xl border-gray-100 cursor-pointer hover:shadow-md transition"
+                  onClick={() => handleMatchClick(match)}
+                >
                   <div className="flex items-center gap-2 mb-3 text-xs text-gray-500">
                     <span>{match.country}</span>
                     <Icon name="Lock" size={12} />
@@ -238,7 +329,14 @@ const Index = () => {
             </div>
 
             <div className="space-y-3">
-              {predictions.map((pred) => (
+              {userPredictions.length === 0 && (
+                <div className="text-center py-12 text-gray-500">
+                  <Icon name="Trophy" size={48} className="mx-auto mb-4 opacity-30" />
+                  <p>У вас пока нет прогнозов</p>
+                  <p className="text-sm mt-2">Сделайте свой первый прогноз на главной странице!</p>
+                </div>
+              )}
+              {userPredictions.map((pred) => (
                 <Card key={pred.id} className="p-4 bg-white rounded-2xl border-gray-100">
                   <div className="flex items-center gap-2 mb-3 text-xs text-gray-500">
                     <span>{pred.match.country}</span>
@@ -515,13 +613,32 @@ const Index = () => {
                 </div>
 
                 <div className="bg-white rounded-lg p-3 mb-3">
-                  <div className="text-sm text-gray-500 mb-1">Приглашено друзей</div>
-                  <div className="text-2xl font-bold text-blue-600">0 друзья</div>
+                  <div className="text-sm text-gray-500 mb-1">Твоя реферальная ссылка</div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <code className="flex-1 bg-gray-50 px-3 py-2 rounded-lg text-xs font-mono break-all">
+                      https://t.me/your_bot?start={userReferralCode}
+                    </code>
+                    <Button
+                      onClick={copyReferralLink}
+                      size="sm"
+                      className="bg-blue-500 hover:bg-blue-600"
+                    >
+                      <Icon name="Copy" size={16} />
+                    </Button>
+                  </div>
                 </div>
 
-                <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-xl py-3 font-semibold flex items-center justify-center gap-2">
+                <div className="bg-white rounded-lg p-3 mb-3">
+                  <div className="text-sm text-gray-500 mb-1">Приглашено друзей</div>
+                  <div className="text-2xl font-bold text-blue-600">{referralCount} {referralCount === 1 ? 'друг' : 'друзей'}</div>
+                </div>
+
+                <Button 
+                  onClick={copyReferralLink}
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-xl py-3 font-semibold flex items-center justify-center gap-2"
+                >
                   Поделиться
-                  <Icon name="Link" size={18} />
+                  <Icon name="Share2" size={18} />
                 </Button>
 
                 <p className="text-xs text-gray-500 text-center mt-2">
@@ -530,6 +647,70 @@ const Index = () => {
               </Card>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showMatchModal} onOpenChange={setShowMatchModal}>
+        <DialogContent className="max-w-md rounded-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">Сделать прогноз</DialogTitle>
+          </DialogHeader>
+
+          {selectedMatch && (
+            <div className="space-y-4">
+              <Card className="p-4 bg-gray-50 border-gray-100">
+                <div className="flex items-center gap-2 mb-3 text-xs text-gray-500">
+                  <span>{selectedMatch.country}</span>
+                  <Icon name="Lock" size={12} />
+                  <span>{selectedMatch.league}</span>
+                  <span className="ml-auto">{selectedMatch.time} {selectedMatch.date}</span>
+                </div>
+
+                <div className="space-y-2 mb-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{selectedMatch.team1Icon}</span>
+                    <span className="font-medium">{selectedMatch.team1}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{selectedMatch.team2Icon}</span>
+                    <span className="font-medium">{selectedMatch.team2}</span>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Коэффициент:</span>
+                  <Badge className="bg-amber-100 text-amber-900 text-lg font-bold px-4 py-2 rounded-xl">
+                    {selectedMatch.odds}
+                  </Badge>
+                </div>
+              </Card>
+
+              <div className="bg-blue-50 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-600">Стоимость прогноза:</span>
+                  <div className="flex items-center gap-2">
+                    <Icon name="Wallet" size={18} className="text-amber-500" />
+                    <span className="font-bold">1 монета</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Ваш баланс:</span>
+                  <div className="flex items-center gap-2">
+                    <Icon name="Wallet" size={18} className="text-amber-500" />
+                    <span className="font-bold">{balance} монет</span>
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                onClick={handleMakePrediction}
+                disabled={balance < 1}
+                className="w-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white rounded-xl py-6 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {balance < 1 ? 'Недостаточно монет' : 'Сделать прогноз'}
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
