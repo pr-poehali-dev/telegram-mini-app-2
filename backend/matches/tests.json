@@ -1,0 +1,39 @@
+{
+  "tests": [
+    {
+      "name": "Get all matches",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "matches": "array"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Create new match",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "league": "Тестовая лига | TEST",
+        "country": "⚽",
+        "time": "20:00",
+        "date": "01.01.2026",
+        "team1": "Команда А",
+        "team1Icon": "🔵",
+        "team2": "Команда Б",
+        "team2Icon": "🔴",
+        "odds": 2.5,
+        "priceCoins": 1,
+        "status": "upcoming",
+        "predictionText": "Тестовый прогноз"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "id": "number",
+        "message": "string"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

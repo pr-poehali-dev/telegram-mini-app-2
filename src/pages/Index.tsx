@@ -46,15 +46,80 @@ const Index = () => {
   const [showBalanceModal, setShowBalanceModal] = useState(false);
   const [showReferralModal, setShowReferralModal] = useState(false);
   const [showMatchModal, setShowMatchModal] = useState(false);
+  const [showAdminModal, setShowAdminModal] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [userReferralCode, setUserReferralCode] = useState('');
   const [referralCount, setReferralCount] = useState(0);
   const [telegramId] = useState(123456789);
   const [userPredictions, setUserPredictions] = useState<Prediction[]>([]);
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [editingMatch, setEditingMatch] = useState<Match | null>(null);
+  const [newMatch, setNewMatch] = useState<Partial<Match>>({
+    league: '',
+    country: '',
+    time: '',
+    date: '',
+    team1: '',
+    team1Icon: '',
+    team2: '',
+    team2Icon: '',
+    odds: 2.0,
+    status: 'upcoming'
+  });
 
   useEffect(() => {
     fetchUserData();
+    fetchMatches();
   }, []);
+
+  const fetchMatches = async () => {
+    try {
+      const response = await fetch('https://functions.poehali.dev/943dbb2a-b32c-4424-a513-6eff0ce47d44');
+      if (response.ok) {
+        const data = await response.json();
+        setMatches(data.matches || []);
+      }
+    } catch (error) {
+      console.error('Error fetching matches:', error);
+    }
+  };
+
+  const handleCreateMatch = async () => {
+    try {
+      const response = await fetch('https://functions.poehali.dev/943dbb2a-b32c-4424-a513-6eff0ce47d44', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newMatch)
+      });
+      
+      if (response.ok) {
+        fetchMatches();
+        setNewMatch({
+          league: '', country: '', time: '', date: '',
+          team1: '', team1Icon: '', team2: '', team2Icon: '',
+          odds: 2.0, status: 'upcoming'
+        });
+        alert('Матч добавлен!');
+      }
+    } catch (error) {
+      console.error('Error creating match:', error);
+    }
+  };
+
+  const handleDeleteMatch = async (matchId: number) => {
+    try {
+      const response = await fetch(`https://functions.poehali.dev/943dbb2a-b32c-4424-a513-6eff0ce47d44?id=${matchId}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        fetchMatches();
+        alert('Матч удалён!');
+      }
+    } catch (error) {
+      console.error('Error deleting match:', error);
+    }
+  };
 
   const fetchUserData = async () => {
     try {
@@ -133,60 +198,7 @@ const Index = () => {
     alert('Ссылка скопирована!');
   };
 
-  const matches: Match[] = [
-    {
-      id: 1,
-      league: 'МЛБ | USA',
-      country: '⚾',
-      time: '02:05',
-      date: '12.08.2025',
-      team1: 'Техас Рейнджерс',
-      team1Icon: '🏅',
-      team2: 'Аризона Даймондбэкс',
-      team2Icon: '🏅',
-      odds: 2.4,
-      status: 'upcoming'
-    },
-    {
-      id: 2,
-      league: 'МЛБ | USA',
-      country: '⚾',
-      time: '02:10',
-      date: '12.08.2025',
-      team1: 'Хьюстон Астрос',
-      team1Icon: '🏅',
-      team2: 'Бостон Ред Сокс',
-      team2Icon: '🏅',
-      odds: 2.0,
-      status: 'upcoming'
-    },
-    {
-      id: 3,
-      league: 'Премьер-лига | ENG',
-      country: '⚽',
-      time: '17:30',
-      date: '04.05.2025',
-      team1: 'Челси',
-      team1Icon: '🔵',
-      team2: 'Ливерпуль',
-      team2Icon: '🔴',
-      odds: 2.4,
-      status: 'upcoming'
-    },
-    {
-      id: 4,
-      league: 'Лига чемпионов | EUR',
-      country: '⚽',
-      time: '21:00',
-      date: '30.04.2025',
-      team1: 'Барселона',
-      team1Icon: '🔴🔵',
-      team2: 'Интер',
-      team2Icon: '⚫🔵',
-      odds: 4.5,
-      status: 'upcoming'
-    }
-  ];
+
 
   const predictions: Prediction[] = [
     {
@@ -534,6 +546,22 @@ const Index = () => {
                 </div>
                 <Icon name="ChevronRight" size={20} className="text-gray-400" />
               </Card>
+
+              <Card 
+                className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-100 flex items-center justify-between cursor-pointer hover:opacity-80 transition"
+                onClick={() => setShowAdminModal(true)}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
+                    <Icon name="Shield" size={24} className="text-purple-600" />
+                  </div>
+                  <div>
+                    <div className="font-semibold">Админ-панель</div>
+                    <div className="text-sm text-gray-500">Управление прогнозами</div>
+                  </div>
+                </div>
+                <Icon name="ChevronRight" size={20} className="text-purple-400" />
+              </Card>
             </div>
           </>
         )}
@@ -772,6 +800,138 @@ const Index = () => {
               </Button>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showAdminModal} onOpenChange={setShowAdminModal}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+              <Icon name="Shield" size={24} className="text-purple-600" />
+              Админ-панель
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            <div>
+              <h3 className="font-bold text-lg mb-3">Добавить новый прогноз</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  placeholder="Лига (например: НБА | USA)"
+                  value={newMatch.league}
+                  onChange={(e) => setNewMatch({...newMatch, league: e.target.value})}
+                  className="col-span-2 px-3 py-2 border rounded-lg"
+                />
+                <input
+                  type="text"
+                  placeholder="Иконка (например: 🏀)"
+                  value={newMatch.country}
+                  onChange={(e) => setNewMatch({...newMatch, country: e.target.value})}
+                  className="px-3 py-2 border rounded-lg"
+                />
+                <input
+                  type="text"
+                  placeholder="Время (например: 20:00)"
+                  value={newMatch.time}
+                  onChange={(e) => setNewMatch({...newMatch, time: e.target.value})}
+                  className="px-3 py-2 border rounded-lg"
+                />
+                <input
+                  type="text"
+                  placeholder="Дата (например: 01.11.2025)"
+                  value={newMatch.date}
+                  onChange={(e) => setNewMatch({...newMatch, date: e.target.value})}
+                  className="col-span-2 px-3 py-2 border rounded-lg"
+                />
+                <input
+                  type="text"
+                  placeholder="Команда 1"
+                  value={newMatch.team1}
+                  onChange={(e) => setNewMatch({...newMatch, team1: e.target.value})}
+                  className="px-3 py-2 border rounded-lg"
+                />
+                <input
+                  type="text"
+                  placeholder="Иконка 1 (например: 🔵)"
+                  value={newMatch.team1Icon}
+                  onChange={(e) => setNewMatch({...newMatch, team1Icon: e.target.value})}
+                  className="px-3 py-2 border rounded-lg"
+                />
+                <input
+                  type="text"
+                  placeholder="Команда 2"
+                  value={newMatch.team2}
+                  onChange={(e) => setNewMatch({...newMatch, team2: e.target.value})}
+                  className="px-3 py-2 border rounded-lg"
+                />
+                <input
+                  type="text"
+                  placeholder="Иконка 2 (например: 🔴)"
+                  value={newMatch.team2Icon}
+                  onChange={(e) => setNewMatch({...newMatch, team2Icon: e.target.value})}
+                  className="px-3 py-2 border rounded-lg"
+                />
+                <input
+                  type="number"
+                  step="0.1"
+                  placeholder="Коэффициент (например: 2.5)"
+                  value={newMatch.odds || ''}
+                  onChange={(e) => setNewMatch({...newMatch, odds: parseFloat(e.target.value)})}
+                  className="px-3 py-2 border rounded-lg"
+                />
+                <input
+                  type="number"
+                  placeholder="Цена в монетах (например: 1)"
+                  defaultValue={1}
+                  className="px-3 py-2 border rounded-lg"
+                />
+              </div>
+              <Button
+                onClick={handleCreateMatch}
+                className="w-full mt-3 bg-purple-500 hover:bg-purple-600 text-white"
+              >
+                <Icon name="Plus" size={18} className="mr-2" />
+                Добавить прогноз
+              </Button>
+            </div>
+
+            <Separator />
+
+            <div>
+              <h3 className="font-bold text-lg mb-3">Текущие прогнозы ({matches.length})</h3>
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {matches.length === 0 && (
+                  <p className="text-gray-500 text-center py-8">Нет прогнозов</p>
+                )}
+                {matches.map((match) => (
+                  <Card key={match.id} className="p-3 bg-gray-50">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="text-xs text-gray-500 mb-1">
+                          {match.country} {match.league} • {match.time} {match.date}
+                        </div>
+                        <div className="font-medium text-sm">
+                          {match.team1Icon} {match.team1} vs {match.team2Icon} {match.team2}
+                        </div>
+                        <div className="text-sm text-amber-600 font-bold mt-1">
+                          Коэф: {match.odds}
+                        </div>
+                      </div>
+                      <Button
+                        onClick={() => handleDeleteMatch(match.id)}
+                        variant="outline"
+                        size="sm"
+                        className="ml-2 text-red-500 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Icon name="Trash2" size={16} />
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
