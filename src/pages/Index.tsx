@@ -398,25 +398,6 @@ const Index = () => {
               </Card>
             </div>
 
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setShowBalanceModal(true)}
-                  className="flex items-center gap-2 bg-white rounded-full px-4 py-2 border border-gray-200"
-                >
-                  <Icon name="Wallet" size={16} className="text-amber-500" />
-                  <span className="font-semibold">{balance}</span>
-                </button>
-                <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
-                  <img 
-                    src="https://cdn.poehali.dev/files/9ef8b515-4c7b-4b46-80d3-e5f412cc7ca6.png" 
-                    alt="Avatar"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-            </div>
-
             <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
               <Button
                 variant={predictionFilter === 'all' ? 'default' : 'outline'}
