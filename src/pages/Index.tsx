@@ -380,22 +380,6 @@ const Index = () => {
               >
                 Открытые ({allPredictions.filter(p => p.status === 'open').length})
               </Button>
-              <Button
-                variant={predictionFilter === 'won' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setPredictionFilter('won')}
-                className={`rounded-full whitespace-nowrap ${predictionFilter === 'won' ? 'bg-green-500' : ''}`}
-              >
-                Выиграли ({allPredictions.filter(p => p.status === 'won').length})
-              </Button>
-              <Button
-                variant={predictionFilter === 'lost' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setPredictionFilter('lost')}
-                className={`rounded-full whitespace-nowrap ${predictionFilter === 'lost' ? 'bg-red-500' : ''}`}
-              >
-                Проиграли ({allPredictions.filter(p => p.status === 'lost').length})
-              </Button>
             </div>
 
             <div className="space-y-3">
@@ -445,21 +429,9 @@ const Index = () => {
                       <div className="text-xs text-gray-500">Прогноз исхода</div>
                       <div className="font-medium">{pred.result}</div>
                     </div>
-                    <div className="text-right">
-                      <Badge className="bg-amber-100 text-amber-900 hover:bg-amber-100 text-lg font-bold px-4 py-2 rounded-xl">
-                        {pred.match.odds}
-                      </Badge>
-                      {pred.status === 'won' && pred.winAmount && (
-                        <div className="text-xs text-green-600 font-semibold mt-1">
-                          +{pred.winAmount - 1} монет
-                        </div>
-                      )}
-                      {pred.status === 'lost' && (
-                        <div className="text-xs text-red-600 font-semibold mt-1">
-                          -1 монета
-                        </div>
-                      )}
-                    </div>
+                    <Badge className="bg-amber-100 text-amber-900 hover:bg-amber-100 text-lg font-bold px-4 py-2 rounded-xl">
+                      {pred.match.odds}
+                    </Badge>
                   </div>
                 </Card>
               ))}
