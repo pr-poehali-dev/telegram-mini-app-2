@@ -888,6 +888,7 @@ const Index = () => {
                 />
               </div>
               <Button
+                type="button"
                 onClick={handleCreateMatch}
                 className="w-full mt-3 bg-purple-500 hover:bg-purple-600 text-white"
               >
