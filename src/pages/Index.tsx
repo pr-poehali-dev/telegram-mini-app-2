@@ -396,8 +396,9 @@ const Index = () => {
                   </div>
                 </div>
               </Card>
+            </div>
 
-              <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setShowBalanceModal(true)}
