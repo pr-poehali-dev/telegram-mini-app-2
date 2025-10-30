@@ -359,44 +359,9 @@ const Index = () => {
 
         {activeTab === 'predictions' && (
           <>
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold mb-4">
-                Мои прогнозы 🏆
-              </h2>
-              
-              <Card className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-100 mb-4">
-                <div className="grid grid-cols-4 gap-2 text-center">
-                  <div>
-                    <div className="text-2xl font-bold text-blue-600">{calculateStats().total}</div>
-                    <div className="text-xs text-gray-600">Всего</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-green-600">{calculateStats().won}</div>
-                    <div className="text-xs text-gray-600">Выигрыши</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-red-600">{calculateStats().lost}</div>
-                    <div className="text-xs text-gray-600">Проигрыши</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-purple-600">{calculateStats().winRate}%</div>
-                    <div className="text-xs text-gray-600">Винрейт</div>
-                  </div>
-                </div>
-                
-                <Separator className="my-3" />
-                
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Общая прибыль:</span>
-                  <div className="flex items-center gap-2">
-                    <Icon name="TrendingUp" size={18} className={calculateStats().totalProfit >= 0 ? 'text-green-500' : 'text-red-500'} />
-                    <span className={`font-bold text-lg ${calculateStats().totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {calculateStats().totalProfit > 0 ? '+' : ''}{calculateStats().totalProfit} монет
-                    </span>
-                  </div>
-                </div>
-              </Card>
-            </div>
+            <h2 className="text-2xl font-bold mb-6">
+              Мои прогнозы 🏆
+            </h2>
 
             <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
               <Button
