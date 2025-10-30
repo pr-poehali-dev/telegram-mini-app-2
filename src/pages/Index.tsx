@@ -27,10 +27,21 @@ type Prediction = {
   result: string;
   opened: string;
   status: 'open' | 'won' | 'lost';
+  winAmount?: number;
+};
+
+type Stats = {
+  total: number;
+  won: number;
+  lost: number;
+  open: number;
+  winRate: number;
+  totalProfit: number;
 };
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<'home' | 'predictions' | 'profile'>('home');
+  const [predictionFilter, setPredictionFilter] = useState<'all' | 'open' | 'won' | 'lost'>('all');
   const [balance, setBalance] = useState(0);
   const [showBalanceModal, setShowBalanceModal] = useState(false);
   const [showReferralModal, setShowReferralModal] = useState(false);
@@ -196,7 +207,8 @@ const Index = () => {
       prediction: 'Победа (с учетом ОТ и буллитов)',
       result: 'Победа 2',
       opened: 'May 4, 2025 03:52',
-      status: 'open'
+      status: 'won',
+      winAmount: 2.7
     },
     {
       id: 2,
@@ -216,9 +228,50 @@ const Index = () => {
       prediction: 'Прогноз исхода',
       result: 'Фора 2',
       opened: 'May 4, 2025 03:50',
-      status: 'open'
+      status: 'lost'
+    },
+    {
+      id: 3,
+      match: {
+        id: 103,
+        league: 'НБА | USA',
+        country: '🏀',
+        time: '02:30',
+        date: '03.05.2025',
+        team1: 'Лейкерс',
+        team1Icon: '💜💛',
+        team2: 'Уорриорз',
+        team2Icon: '💙💛',
+        odds: 3.2,
+        status: 'upcoming'
+      },
+      prediction: 'Прогноз исхода',
+      result: 'Победа 1',
+      opened: 'May 3, 2025 01:20',
+      status: 'won',
+      winAmount: 3.2
     }
   ];
+
+  const allPredictions = [...userPredictions, ...predictions];
+  const filteredPredictions = predictionFilter === 'all' 
+    ? allPredictions 
+    : allPredictions.filter(p => p.status === predictionFilter);
+
+  const calculateStats = (): Stats => {
+    const total = allPredictions.length;
+    const won = allPredictions.filter(p => p.status === 'won').length;
+    const lost = allPredictions.filter(p => p.status === 'lost').length;
+    const open = allPredictions.filter(p => p.status === 'open').length;
+    const winRate = total > 0 ? Math.round((won / total) * 100) : 0;
+    const totalProfit = allPredictions.reduce((sum, p) => {
+      if (p.status === 'won') return sum + (p.winAmount || 0) - 1;
+      if (p.status === 'lost') return sum - 1;
+      return sum;
+    }, 0);
+    
+    return { total, won, lost, open, winRate, totalProfit: Math.round(totalProfit * 10) / 10 };
+  };
 
   const purchaseOptions = [
     { coins: 10, stars: 300, bonus: 0 },
@@ -306,10 +359,45 @@ const Index = () => {
 
         {activeTab === 'predictions' && (
           <>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold mb-4">
                 Мои прогнозы 🏆
               </h2>
+              
+              <Card className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-100 mb-4">
+                <div className="grid grid-cols-4 gap-2 text-center">
+                  <div>
+                    <div className="text-2xl font-bold text-blue-600">{calculateStats().total}</div>
+                    <div className="text-xs text-gray-600">Всего</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-green-600">{calculateStats().won}</div>
+                    <div className="text-xs text-gray-600">Выигрыши</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-red-600">{calculateStats().lost}</div>
+                    <div className="text-xs text-gray-600">Проигрыши</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-purple-600">{calculateStats().winRate}%</div>
+                    <div className="text-xs text-gray-600">Винрейт</div>
+                  </div>
+                </div>
+                
+                <Separator className="my-3" />
+                
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Общая прибыль:</span>
+                  <div className="flex items-center gap-2">
+                    <Icon name="TrendingUp" size={18} className={calculateStats().totalProfit >= 0 ? 'text-green-500' : 'text-red-500'} />
+                    <span className={`font-bold text-lg ${calculateStats().totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {calculateStats().totalProfit > 0 ? '+' : ''}{calculateStats().totalProfit} монет
+                    </span>
+                  </div>
+                </div>
+              </Card>
+
+              <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setShowBalanceModal(true)}
@@ -328,15 +416,49 @@ const Index = () => {
               </div>
             </div>
 
+            <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+              <Button
+                variant={predictionFilter === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setPredictionFilter('all')}
+                className={`rounded-full whitespace-nowrap ${predictionFilter === 'all' ? 'bg-blue-500' : ''}`}
+              >
+                Все ({allPredictions.length})
+              </Button>
+              <Button
+                variant={predictionFilter === 'open' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setPredictionFilter('open')}
+                className={`rounded-full whitespace-nowrap ${predictionFilter === 'open' ? 'bg-amber-500' : ''}`}
+              >
+                Открытые ({allPredictions.filter(p => p.status === 'open').length})
+              </Button>
+              <Button
+                variant={predictionFilter === 'won' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setPredictionFilter('won')}
+                className={`rounded-full whitespace-nowrap ${predictionFilter === 'won' ? 'bg-green-500' : ''}`}
+              >
+                Выиграли ({allPredictions.filter(p => p.status === 'won').length})
+              </Button>
+              <Button
+                variant={predictionFilter === 'lost' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setPredictionFilter('lost')}
+                className={`rounded-full whitespace-nowrap ${predictionFilter === 'lost' ? 'bg-red-500' : ''}`}
+              >
+                Проиграли ({allPredictions.filter(p => p.status === 'lost').length})
+              </Button>
+            </div>
+
             <div className="space-y-3">
-              {userPredictions.length === 0 && (
+              {filteredPredictions.length === 0 && (
                 <div className="text-center py-12 text-gray-500">
                   <Icon name="Trophy" size={48} className="mx-auto mb-4 opacity-30" />
-                  <p>У вас пока нет прогнозов</p>
-                  <p className="text-sm mt-2">Сделайте свой первый прогноз на главной странице!</p>
+                  <p>Нет прогнозов с таким статусом</p>
                 </div>
               )}
-              {userPredictions.map((pred) => (
+              {filteredPredictions.map((pred) => (
                 <Card key={pred.id} className="p-4 bg-white rounded-2xl border-gray-100">
                   <div className="flex items-center gap-2 mb-3 text-xs text-gray-500">
                     <span>{pred.match.country}</span>
@@ -357,8 +479,16 @@ const Index = () => {
                   </div>
 
                   <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                    <Icon name="CheckCircle" size={16} className="text-green-500" />
-                    <span>Открыто: {pred.opened}</span>
+                    <Icon 
+                      name={pred.status === 'won' ? 'CheckCircle' : pred.status === 'lost' ? 'XCircle' : 'Clock'} 
+                      size={16} 
+                      className={pred.status === 'won' ? 'text-green-500' : pred.status === 'lost' ? 'text-red-500' : 'text-amber-500'} 
+                    />
+                    <span>
+                      {pred.status === 'won' && 'Выиграл'}
+                      {pred.status === 'lost' && 'Проиграл'}
+                      {pred.status === 'open' && `Открыто: ${pred.opened}`}
+                    </span>
                   </div>
 
                   <Separator className="my-3" />
@@ -368,9 +498,21 @@ const Index = () => {
                       <div className="text-xs text-gray-500">Прогноз исхода</div>
                       <div className="font-medium">{pred.result}</div>
                     </div>
-                    <Badge className="bg-amber-100 text-amber-900 hover:bg-amber-100 text-lg font-bold px-4 py-2 rounded-xl">
-                      {pred.match.odds}
-                    </Badge>
+                    <div className="text-right">
+                      <Badge className="bg-amber-100 text-amber-900 hover:bg-amber-100 text-lg font-bold px-4 py-2 rounded-xl">
+                        {pred.match.odds}
+                      </Badge>
+                      {pred.status === 'won' && pred.winAmount && (
+                        <div className="text-xs text-green-600 font-semibold mt-1">
+                          +{pred.winAmount - 1} монет
+                        </div>
+                      )}
+                      {pred.status === 'lost' && (
+                        <div className="text-xs text-red-600 font-semibold mt-1">
+                          -1 монета
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </Card>
               ))}
