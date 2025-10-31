@@ -85,12 +85,14 @@ const Index = () => {
   };
 
   const handleCreateMatch = async () => {
+    console.log('handleCreateMatch вызвана, данные:', newMatch);
     try {
       const response = await fetch('https://functions.poehali.dev/943dbb2a-b32c-4424-a513-6eff0ce47d44', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newMatch)
       });
+      console.log('Ответ сервера:', response.status);
       
       if (response.ok) {
         fetchMatches();
