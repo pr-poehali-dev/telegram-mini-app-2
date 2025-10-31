@@ -813,7 +813,7 @@ const Index = () => {
           </DialogHeader>
 
           <div className="space-y-6">
-            <div>
+            <form onSubmit={(e) => { e.preventDefault(); handleCreateMatch(); }}>
               <h3 className="font-bold text-lg mb-3">Добавить новый прогноз</h3>
               <div className="grid grid-cols-2 gap-3">
                 <input
@@ -888,14 +888,13 @@ const Index = () => {
                 />
               </div>
               <Button
-                type="button"
-                onClick={handleCreateMatch}
+                type="submit"
                 className="w-full mt-3 bg-purple-500 hover:bg-purple-600 text-white"
               >
                 <Icon name="Plus" size={18} className="mr-2" />
                 Добавить прогноз
               </Button>
-            </div>
+            </form>
 
             <Separator />
 
