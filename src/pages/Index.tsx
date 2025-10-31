@@ -815,7 +815,11 @@ const Index = () => {
           </DialogHeader>
 
           <div className="space-y-6">
-            <form onSubmit={(e) => { e.preventDefault(); handleCreateMatch(); }}>
+            <form onSubmit={(e) => { 
+              e.preventDefault(); 
+              e.stopPropagation();
+              handleCreateMatch(); 
+            }}>
               <h3 className="font-bold text-lg mb-3">Добавить новый прогноз</h3>
               <div className="grid grid-cols-2 gap-3">
                 <input
