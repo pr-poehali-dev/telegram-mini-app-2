@@ -40,7 +40,14 @@ type Stats = {
 };
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState<'home' | 'predictions' | 'profile'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'predictions' | 'profile'>(() => {
+    const saved = localStorage.getItem('activeTab');
+    return (saved as 'home' | 'predictions' | 'profile') || 'home';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('activeTab', activeTab);
+  }, [activeTab]);
   const [predictionFilter, setPredictionFilter] = useState<'all' | 'open' | 'won' | 'lost'>('all');
   const [balance, setBalance] = useState(0);
   const [showBalanceModal, setShowBalanceModal] = useState(false);
