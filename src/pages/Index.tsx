@@ -17,6 +17,7 @@ type Match = {
   team2: string;
   team2Icon: string;
   odds: number;
+  price?: number;
   status: 'upcoming' | 'live';
 };
 
@@ -71,6 +72,7 @@ const Index = () => {
     team2: '',
     team2Icon: '',
     odds: 2.0,
+    price: 1,
     status: 'upcoming'
   });
 
@@ -104,7 +106,7 @@ const Index = () => {
         setNewMatch({
           league: '', country: '', time: '', date: '',
           team1: '', team1Icon: '', team2: '', team2Icon: '',
-          odds: 2.0, status: 'upcoming'
+          odds: 2.0, price: 1, status: 'upcoming'
         });
         alert('Матч добавлен!');
       }
@@ -894,7 +896,8 @@ const Index = () => {
                 <input
                   type="number"
                   placeholder="Цена в монетах (например: 1)"
-                  defaultValue={1}
+                  value={newMatch.price || 1}
+                  onChange={(e) => setNewMatch({...newMatch, price: parseInt(e.target.value)})}
                   className="px-3 py-2 border rounded-lg"
                 />
               </div>
