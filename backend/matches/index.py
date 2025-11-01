@@ -32,7 +32,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         match_id = event.get('queryStringParameters', {}).get('id') if event.get('queryStringParameters') else None
         
         if match_id:
-            query = f"SELECT id, league, country, match_time, match_date, team1, team1_icon, team2, team2_icon, odds, price_coins, status, prediction_text FROM t_p97532815_telegram_mini_app_2.matches WHERE id = {int(match_id)} AND is_active = true"
+            query = f"SELECT id, league, country, match_time, match_date, team1, team1_icon, team2, team2_icon, odds, price_coins, status, prediction_text, confidence_percent FROM t_p97532815_telegram_mini_app_2.matches WHERE id = {int(match_id)} AND is_active = true"
             cur.execute(query)
             row = cur.fetchone()
             
@@ -42,7 +42,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'time': row[3], 'date': row[4], 'team1': row[5],
                     'team1Icon': row[6], 'team2': row[7], 'team2Icon': row[8],
                     'odds': float(row[9]), 'priceCoins': row[10],
-                    'status': row[11], 'predictionText': row[12]
+                    'status': row[11], 'predictionText': row[12],
+                    'confidence': row[13]
                 }
                 cur.close()
                 conn.close()
@@ -54,7 +55,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         else:
             cur.execute(
                 "SELECT id, league, country, match_time, match_date, team1, team1_icon, "
-                "team2, team2_icon, odds, price_coins, status, prediction_text "
+                "team2, team2_icon, odds, price_coins, status, prediction_text, confidence_percent "
                 "FROM t_p97532815_telegram_mini_app_2.matches WHERE is_active = true "
                 "ORDER BY created_at DESC"
             )
@@ -67,7 +68,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'time': row[3], 'date': row[4], 'team1': row[5],
                     'team1Icon': row[6], 'team2': row[7], 'team2Icon': row[8],
                     'odds': float(row[9]), 'priceCoins': row[10],
-                    'status': row[11], 'predictionText': row[12]
+                    'status': row[11], 'predictionText': row[12],
+                    'confidence': row[13]
                 })
             
             cur.close()
@@ -93,13 +95,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         price_coins = int(body_data.get('priceCoins', 1))
         status = body_data.get('status', 'upcoming').replace("'", "''")
         prediction_text = body_data.get('predictionText', '').replace("'", "''")
+        confidence = int(body_data.get('confidence', 75))
         
         query = f"""
         INSERT INTO t_p97532815_telegram_mini_app_2.matches 
         (league, country, match_time, match_date, team1, team1_icon, team2, team2_icon, 
-        odds, price_coins, status, prediction_text) 
+        odds, price_coins, status, prediction_text, confidence_percent) 
         VALUES ('{league}', '{country}', '{time_val}', '{date_val}', '{team1}', '{team1_icon}', 
-        '{team2}', '{team2_icon}', {odds}, {price_coins}, '{status}', '{prediction_text}')
+        '{team2}', '{team2_icon}', {odds}, {price_coins}, '{status}', '{prediction_text}', {confidence})
         RETURNING id
         """
         
@@ -131,12 +134,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         price_coins = int(body_data.get('priceCoins', 1))
         status = body_data.get('status', 'upcoming').replace("'", "''")
         prediction_text = body_data.get('predictionText', '').replace("'", "''")
+        confidence = int(body_data.get('confidence', 75))
         
         query = f"""
         UPDATE t_p97532815_telegram_mini_app_2.matches SET 
         league = '{league}', country = '{country}', match_time = '{time_val}', match_date = '{date_val}', 
         team1 = '{team1}', team1_icon = '{team1_icon}', team2 = '{team2}', team2_icon = '{team2_icon}', 
-        odds = {odds}, price_coins = {price_coins}, status = '{status}', prediction_text = '{prediction_text}' 
+        odds = {odds}, price_coins = {price_coins}, status = '{status}', prediction_text = '{prediction_text}', 
+        confidence_percent = {confidence} 
         WHERE id = {match_id}
         """
         

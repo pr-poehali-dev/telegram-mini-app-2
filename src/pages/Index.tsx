@@ -18,6 +18,7 @@ type Match = {
   team2Icon: string;
   odds: number;
   price?: number;
+  confidence?: number;
   status: 'upcoming' | 'live';
 };
 
@@ -73,6 +74,7 @@ const Index = () => {
     team2Icon: '',
     odds: 2.0,
     price: 1,
+    confidence: 75,
     status: 'upcoming'
   });
 
@@ -88,7 +90,8 @@ const Index = () => {
         const data = await response.json();
         const mappedMatches = (data.matches || []).map((m: any) => ({
           ...m,
-          price: m.priceCoins || m.price || 1
+          price: m.priceCoins || m.price || 1,
+          confidence: m.confidence || 75
         }));
         setMatches(mappedMatches);
       }
@@ -101,7 +104,8 @@ const Index = () => {
     try {
       const matchData = {
         ...newMatch,
-        priceCoins: newMatch.price || 1
+        priceCoins: newMatch.price || 1,
+        confidence: newMatch.confidence || 75
       };
       const response = await fetch('https://functions.poehali.dev/943dbb2a-b32c-4424-a513-6eff0ce47d44', {
         method: 'POST',
@@ -114,7 +118,7 @@ const Index = () => {
         setNewMatch({
           league: '', country: '', time: '', date: '',
           team1: '', team1Icon: '', team2: '', team2Icon: '',
-          odds: 2.0, price: 1, status: 'upcoming'
+          odds: 2.0, price: 1, confidence: 75, status: 'upcoming'
         });
         alert('Матч добавлен!');
       }
@@ -377,8 +381,20 @@ const Index = () => {
                     </div>
                   </div>
 
-                  <div className="flex justify-end">
-                    <Badge className="bg-amber-100 text-amber-900 hover:bg-amber-100 text-lg font-bold px-4 py-2 rounded-xl">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="text-xs text-gray-500 mb-1">Уверенность</div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-amber-400 to-green-500 rounded-full transition-all"
+                            style={{ width: `${match.confidence || 75}%` }}
+                          />
+                        </div>
+                        <span className="text-sm font-semibold text-gray-700">{match.confidence || 75}%</span>
+                      </div>
+                    </div>
+                    <Badge className="bg-amber-100 text-amber-900 hover:bg-amber-100 text-lg font-bold px-4 py-2 rounded-xl ml-4">
                       {match.odds}
                     </Badge>
                   </div>
@@ -785,11 +801,24 @@ const Index = () => {
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center mb-3">
                   <span className="text-sm text-gray-600">Коэффициент:</span>
                   <Badge className="bg-amber-100 text-amber-900 text-lg font-bold px-4 py-2 rounded-xl">
                     {selectedMatch.odds}
                   </Badge>
+                </div>
+
+                <div>
+                  <div className="text-sm text-gray-600 mb-2">Уверенность в заходе</div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-amber-400 to-green-500 rounded-full"
+                        style={{ width: `${selectedMatch.confidence || 75}%` }}
+                      />
+                    </div>
+                    <span className="text-lg font-bold text-gray-700">{selectedMatch.confidence || 75}%</span>
+                  </div>
                 </div>
               </Card>
 
@@ -910,6 +939,20 @@ const Index = () => {
                   onChange={(e) => setNewMatch({...newMatch, price: parseInt(e.target.value)})}
                   className="px-3 py-2 border rounded-lg"
                 />
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Уверенность в заходе: {newMatch.confidence || 75}%
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="5"
+                    value={newMatch.confidence || 75}
+                    onChange={(e) => setNewMatch({...newMatch, confidence: parseInt(e.target.value)})}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                  />
+                </div>
               </div>
               <Button
                 type="submit"
