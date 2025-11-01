@@ -63,6 +63,8 @@ const Index = () => {
   const [userPredictions, setUserPredictions] = useState<Prediction[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [editingMatch, setEditingMatch] = useState<Match | null>(null);
+  const [bannerUrl, setBannerUrl] = useState('https://example.com');
+  const [newBannerUrl, setNewBannerUrl] = useState('');
   const [newMatch, setNewMatch] = useState<Partial<Match>>({
     league: '',
     country: '',
@@ -81,6 +83,7 @@ const Index = () => {
   useEffect(() => {
     fetchUserData();
     fetchMatches();
+    fetchBannerSettings();
   }, []);
 
   const fetchMatches = async () => {
@@ -97,6 +100,36 @@ const Index = () => {
       }
     } catch (error) {
       console.error('Error fetching matches:', error);
+    }
+  };
+
+  const fetchBannerSettings = async () => {
+    try {
+      const response = await fetch('https://functions.poehali.dev/b61425de-6d34-40d1-9acc-ed35483ef695');
+      if (response.ok) {
+        const data = await response.json();
+        setBannerUrl(data.banner_url || 'https://example.com');
+      }
+    } catch (error) {
+      console.error('Error fetching banner settings:', error);
+    }
+  };
+
+  const updateBannerUrl = async () => {
+    try {
+      const response = await fetch('https://functions.poehali.dev/b61425de-6d34-40d1-9acc-ed35483ef695', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ banner_url: newBannerUrl })
+      });
+      
+      if (response.ok) {
+        setBannerUrl(newBannerUrl);
+        setNewBannerUrl('');
+        alert('Ссылка баннера обновлена!');
+      }
+    } catch (error) {
+      console.error('Error updating banner:', error);
     }
   };
 
@@ -355,6 +388,53 @@ const Index = () => {
                 </div>
               </div>
             </div>
+
+            <a 
+              href={bannerUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block mb-6"
+            >
+              <Card className="p-5 bg-gradient-to-br from-yellow-50 via-orange-50 to-yellow-100 border-2 border-yellow-300 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="flex items-center gap-2 bg-teal-100 rounded-full px-3 py-1">
+                    <Icon name="CheckCircle" size={16} className="text-teal-600" />
+                    <span className="text-xs font-medium text-teal-700">Проверенный партнер</span>
+                  </div>
+                  <div className="flex gap-1 ml-auto">
+                    {[1,2,3,4,5].map(i => (
+                      <Icon key={i} name="Star" size={16} className="text-yellow-500 fill-yellow-500" />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-3xl">🎰</span>
+                  <h3 className="text-2xl font-bold text-gray-800">Премиум партнер</h3>
+                </div>
+
+                <p className="text-gray-700 font-medium mb-2">
+                  Присоединяйся к проверенной БК платформе
+                </p>
+
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-2xl">🎁</span>
+                  <p className="text-gray-600">
+                    Забери свой Welcome Bonus и начинай ставить
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-2xl px-6 py-3 font-semibold shadow-md">
+                    <span>Регистрация + Бонус</span>
+                    <Icon name="ArrowRight" size={20} />
+                  </div>
+                  <div className="bg-white px-4 py-2 rounded-xl border-2 border-orange-200 font-bold text-orange-600">
+                    OFFICIAL
+                  </div>
+                </div>
+              </Card>
+            </a>
 
             <div className="space-y-3">
               {matches.map((match) => (
@@ -962,6 +1042,32 @@ const Index = () => {
                 Добавить прогноз
               </Button>
             </form>
+
+            <Separator />
+
+            <div className="space-y-3">
+              <h3 className="font-bold text-lg">Настройки баннера</h3>
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  placeholder={`Текущая ссылка: ${bannerUrl}`}
+                  value={newBannerUrl}
+                  onChange={(e) => setNewBannerUrl(e.target.value)}
+                  className="flex-1 px-3 py-2 border rounded-lg"
+                />
+                <Button
+                  onClick={updateBannerUrl}
+                  disabled={!newBannerUrl}
+                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                >
+                  <Icon name="Link" size={18} className="mr-2" />
+                  Обновить
+                </Button>
+              </div>
+              <p className="text-xs text-gray-500">
+                Текущая ссылка баннера: <a href={bannerUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">{bannerUrl}</a>
+              </p>
+            </div>
 
             <Separator />
 
