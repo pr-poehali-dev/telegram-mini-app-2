@@ -173,7 +173,9 @@ const Index = () => {
   };
 
   const handleMakePrediction = async () => {
-    if (balance < 1) {
+    const matchPrice = selectedMatch?.price || 1;
+    
+    if (balance < matchPrice) {
       alert('Недостаточно монет! Пополните баланс.');
       return;
     }
@@ -195,7 +197,7 @@ const Index = () => {
       };
 
       setUserPredictions([newPrediction, ...userPredictions]);
-      setBalance(balance - 1);
+      setBalance(balance - matchPrice);
       setShowMatchModal(false);
       setActiveTab('predictions');
     }
@@ -788,7 +790,7 @@ const Index = () => {
                   <span className="text-sm text-gray-600">Стоимость прогноза:</span>
                   <div className="flex items-center gap-2">
                     <Icon name="Wallet" size={18} className="text-amber-500" />
-                    <span className="font-bold">1 монета</span>
+                    <span className="font-bold">{selectedMatch.price || 1} {selectedMatch.price === 1 ? 'монета' : 'монет'}</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
@@ -802,10 +804,10 @@ const Index = () => {
 
               <Button
                 onClick={handleMakePrediction}
-                disabled={balance < 1}
+                disabled={balance < (selectedMatch.price || 1)}
                 className="w-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white rounded-xl py-6 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {balance < 1 ? 'Недостаточно монет' : 'Сделать прогноз'}
+                {balance < (selectedMatch.price || 1) ? 'Недостаточно монет' : 'Сделать прогноз'}
               </Button>
             </div>
           )}
