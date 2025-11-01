@@ -387,7 +387,7 @@ const Index = () => {
                       <div className="flex items-center gap-2">
                         <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                           <div 
-                            className="h-full bg-gradient-to-r from-amber-400 to-green-500 rounded-full transition-all"
+                            className="h-full bg-[#0088cc] rounded-full transition-all"
                             style={{ width: `${match.confidence || 75}%` }}
                           />
                         </div>
@@ -813,7 +813,7 @@ const Index = () => {
                   <div className="flex items-center gap-3">
                     <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-gradient-to-r from-amber-400 to-green-500 rounded-full"
+                        className="h-full bg-[#0088cc] rounded-full"
                         style={{ width: `${selectedMatch.confidence || 75}%` }}
                       />
                     </div>
