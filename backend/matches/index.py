@@ -1,7 +1,7 @@
 import json
 import os
 import psycopg2
-from typing import Dict, Any, List
+from typing import Dict, Any
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     '''
@@ -29,15 +29,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     cur = conn.cursor()
     
     if method == 'GET':
-        match_id = event.get('queryStringParameters', {}).get('id')
+        match_id = event.get('queryStringParameters', {}).get('id') if event.get('queryStringParameters') else None
         
         if match_id:
-            cur.execute(
-                "SELECT id, league, country, match_time, match_date, team1, team1_icon, "
-                "team2, team2_icon, odds, price_coins, status, prediction_text "
-                "FROM t_p97532815_telegram_mini_app_2.matches WHERE id = %s AND is_active = true",
-                (match_id,)
-            )
+            query = f"SELECT id, league, country, match_time, match_date, team1, team1_icon, team2, team2_icon, odds, price_coins, status, prediction_text FROM t_p97532815_telegram_mini_app_2.matches WHERE id = {int(match_id)} AND is_active = true"
+            cur.execute(query)
             row = cur.fetchone()
             
             if row:
@@ -85,20 +81,29 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     if method == 'POST':
         body_data = json.loads(event.get('body', '{}'))
         
-        cur.execute(
-            "INSERT INTO t_p97532815_telegram_mini_app_2.matches "
-            "(league, country, match_time, match_date, team1, team1_icon, team2, team2_icon, "
-            "odds, price_coins, status, prediction_text) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
-            (
-                body_data['league'], body_data['country'], body_data['time'],
-                body_data['date'], body_data['team1'], body_data['team1Icon'],
-                body_data['team2'], body_data['team2Icon'], body_data['odds'],
-                body_data.get('priceCoins', 1), body_data.get('status', 'upcoming'),
-                body_data.get('predictionText', '')
-            )
-        )
+        league = body_data.get('league', '').replace("'", "''")
+        country = body_data.get('country', '').replace("'", "''")
+        time_val = body_data.get('time', '').replace("'", "''")
+        date_val = body_data.get('date', '').replace("'", "''")
+        team1 = body_data.get('team1', '').replace("'", "''")
+        team1_icon = body_data.get('team1Icon', '').replace("'", "''")
+        team2 = body_data.get('team2', '').replace("'", "''")
+        team2_icon = body_data.get('team2Icon', '').replace("'", "''")
+        odds = float(body_data.get('odds', 2.0))
+        price_coins = int(body_data.get('priceCoins', 1))
+        status = body_data.get('status', 'upcoming').replace("'", "''")
+        prediction_text = body_data.get('predictionText', '').replace("'", "''")
         
+        query = f"""
+        INSERT INTO t_p97532815_telegram_mini_app_2.matches 
+        (league, country, match_time, match_date, team1, team1_icon, team2, team2_icon, 
+        odds, price_coins, status, prediction_text) 
+        VALUES ('{league}', '{country}', '{time_val}', '{date_val}', '{team1}', '{team1_icon}', 
+        '{team2}', '{team2_icon}', {odds}, {price_coins}, '{status}', '{prediction_text}')
+        RETURNING id
+        """
+        
+        cur.execute(query)
         match_id = cur.fetchone()[0]
         conn.commit()
         cur.close()
@@ -112,23 +117,30 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     
     if method == 'PUT':
         body_data = json.loads(event.get('body', '{}'))
-        match_id = body_data.get('id')
+        match_id = int(body_data.get('id', 0))
         
-        cur.execute(
-            "UPDATE t_p97532815_telegram_mini_app_2.matches SET "
-            "league = %s, country = %s, match_time = %s, match_date = %s, "
-            "team1 = %s, team1_icon = %s, team2 = %s, team2_icon = %s, "
-            "odds = %s, price_coins = %s, status = %s, prediction_text = %s "
-            "WHERE id = %s",
-            (
-                body_data['league'], body_data['country'], body_data['time'],
-                body_data['date'], body_data['team1'], body_data['team1Icon'],
-                body_data['team2'], body_data['team2Icon'], body_data['odds'],
-                body_data.get('priceCoins', 1), body_data.get('status', 'upcoming'),
-                body_data.get('predictionText', ''), match_id
-            )
-        )
+        league = body_data.get('league', '').replace("'", "''")
+        country = body_data.get('country', '').replace("'", "''")
+        time_val = body_data.get('time', '').replace("'", "''")
+        date_val = body_data.get('date', '').replace("'", "''")
+        team1 = body_data.get('team1', '').replace("'", "''")
+        team1_icon = body_data.get('team1Icon', '').replace("'", "''")
+        team2 = body_data.get('team2', '').replace("'", "''")
+        team2_icon = body_data.get('team2Icon', '').replace("'", "''")
+        odds = float(body_data.get('odds', 2.0))
+        price_coins = int(body_data.get('priceCoins', 1))
+        status = body_data.get('status', 'upcoming').replace("'", "''")
+        prediction_text = body_data.get('predictionText', '').replace("'", "''")
         
+        query = f"""
+        UPDATE t_p97532815_telegram_mini_app_2.matches SET 
+        league = '{league}', country = '{country}', match_time = '{time_val}', match_date = '{date_val}', 
+        team1 = '{team1}', team1_icon = '{team1_icon}', team2 = '{team2}', team2_icon = '{team2_icon}', 
+        odds = {odds}, price_coins = {price_coins}, status = '{status}', prediction_text = '{prediction_text}' 
+        WHERE id = {match_id}
+        """
+        
+        cur.execute(query)
         conn.commit()
         cur.close()
         conn.close()
@@ -140,14 +152,13 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         }
     
     if method == 'DELETE':
-        match_id = event.get('queryStringParameters', {}).get('id')
+        match_id = event.get('queryStringParameters', {}).get('id') if event.get('queryStringParameters') else None
         
-        cur.execute(
-            "UPDATE t_p97532815_telegram_mini_app_2.matches SET is_active = false WHERE id = %s",
-            (match_id,)
-        )
+        if match_id:
+            query = f"UPDATE t_p97532815_telegram_mini_app_2.matches SET is_active = false WHERE id = {int(match_id)}"
+            cur.execute(query)
+            conn.commit()
         
-        conn.commit()
         cur.close()
         conn.close()
         

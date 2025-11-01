@@ -1,0 +1,15 @@
+CREATE TABLE t_p97532815_telegram_mini_app_2.matches (
+    id SERIAL PRIMARY KEY,
+    league VARCHAR(255) NOT NULL,
+    country VARCHAR(255) NOT NULL,
+    time VARCHAR(10) NOT NULL,
+    date VARCHAR(20) NOT NULL,
+    team1 VARCHAR(255) NOT NULL,
+    team1_icon VARCHAR(10) NOT NULL,
+    team2 VARCHAR(255) NOT NULL,
+    team2_icon VARCHAR(10) NOT NULL,
+    odds DECIMAL(5,2) NOT NULL DEFAULT 2.0,
+    price INTEGER NOT NULL DEFAULT 1,
+    status VARCHAR(20) NOT NULL DEFAULT 'upcoming',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

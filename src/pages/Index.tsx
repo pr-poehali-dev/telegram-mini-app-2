@@ -86,7 +86,11 @@ const Index = () => {
       const response = await fetch('https://functions.poehali.dev/943dbb2a-b32c-4424-a513-6eff0ce47d44');
       if (response.ok) {
         const data = await response.json();
-        setMatches(data.matches || []);
+        const mappedMatches = (data.matches || []).map((m: any) => ({
+          ...m,
+          price: m.priceCoins || m.price || 1
+        }));
+        setMatches(mappedMatches);
       }
     } catch (error) {
       console.error('Error fetching matches:', error);
@@ -95,10 +99,14 @@ const Index = () => {
 
   const handleCreateMatch = async () => {
     try {
+      const matchData = {
+        ...newMatch,
+        priceCoins: newMatch.price || 1
+      };
       const response = await fetch('https://functions.poehali.dev/943dbb2a-b32c-4424-a513-6eff0ce47d44', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newMatch)
+        body: JSON.stringify(matchData)
       });
       
       if (response.ok) {
