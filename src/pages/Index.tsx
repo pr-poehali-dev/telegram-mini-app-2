@@ -351,6 +351,58 @@ const Index = () => {
     { coins: 500, stars: 8500, bonus: 100 }
   ];
 
+  const handlePurchase = async (coins: number, stars: number, bonus: number) => {
+    try {
+      const telegram = (window as any).Telegram?.WebApp;
+      
+      if (!telegram) {
+        alert('Это приложение работает только в Telegram');
+        return;
+      }
+
+      const totalCoins = coins + bonus;
+      const invoiceLink = await createInvoice(coins, stars, bonus);
+      
+      telegram.openInvoice(invoiceLink, async (status: string) => {
+        if (status === 'paid') {
+          setBalance(prev => prev + totalCoins);
+          await fetchUserData();
+          alert(`Успешно! Получено ${totalCoins} монет`);
+          setShowBalanceModal(false);
+        } else if (status === 'cancelled') {
+          console.log('Оплата отменена');
+        } else if (status === 'failed') {
+          alert('Ошибка оплаты. Попробуйте снова');
+        }
+      });
+    } catch (error) {
+      console.error('Ошибка покупки:', error);
+      alert('Ошибка при создании платежа');
+    }
+  };
+
+  const createInvoice = async (coins: number, stars: number, bonus: number): Promise<string> => {
+    const response = await fetch('https://functions.poehali.dev/d6505aff-9b33-449b-82ac-35dfe9826a70', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        coins,
+        stars,
+        bonus,
+        userId: telegramId
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Не удалось создать платёж');
+    }
+
+    const data = await response.json();
+    return data.invoiceLink;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <header className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3">
@@ -747,7 +799,10 @@ const Index = () => {
                       <span className="text-sm text-gray-600">{option.stars} звёзд</span>
                     </div>
                   </div>
-                  <Button className="bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-white rounded-xl px-6 py-3 text-base font-semibold shadow-md">
+                  <Button 
+                    onClick={() => handlePurchase(option.coins, option.stars, option.bonus)}
+                    className="bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-white rounded-xl px-6 py-3 text-base font-semibold shadow-md"
+                  >
                     Купить
                   </Button>
                 </div>
