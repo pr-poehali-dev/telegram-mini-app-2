@@ -342,11 +342,13 @@ const Index = () => {
   };
 
   const purchaseOptions = [
-    { coins: 10, stars: 300, bonus: 0 },
-    { coins: 25, stars: 750, bonus: 2 },
-    { coins: 50, stars: 1500, bonus: 5 },
-    { coins: 100, stars: 3000, bonus: 10 },
-    { coins: 200, stars: 6000, bonus: 20 }
+    { coins: 5, stars: 500, bonus: 0 },
+    { coins: 10, stars: 850, bonus: 2 },
+    { coins: 25, stars: 1500, bonus: 5 },
+    { coins: 50, stars: 2500, bonus: 10 },
+    { coins: 100, stars: 4000, bonus: 25 },
+    { coins: 200, stars: 6500, bonus: 55 },
+    { coins: 500, stars: 8500, bonus: 100 }
   ];
 
   return (
@@ -727,27 +729,27 @@ const Index = () => {
 
             <div className="text-sm font-semibold text-gray-700">Купить ещё монеты</div>
 
-            <div className="space-y-2 max-h-64 overflow-y-auto">
+            <div className="space-y-3 max-h-96 overflow-y-auto">
               {purchaseOptions.map((option, index) => (
-                <div key={index} className="bg-gray-50 rounded-xl p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Icon name="Wallet" size={20} className="text-amber-500" />
-                    <span className="font-semibold">{option.coins} монет</span>
-                    {option.bonus > 0 && (
-                      <Badge className="bg-amber-100 text-amber-700 text-xs">
-                        +{option.bonus} бонус
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1">
-                      <Icon name="Star" size={16} className="text-amber-500 fill-amber-500" />
-                      <span className="font-semibold">{option.stars} звёзд</span>
+                <div key={index} className="bg-white border-2 border-amber-100 rounded-2xl p-4 flex items-center justify-between hover:border-amber-300 transition">
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <Icon name="Wallet" size={20} className="text-amber-500" />
+                      <span className="font-bold text-lg">{option.coins} монет</span>
+                      {option.bonus > 0 && (
+                        <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-2 py-1 rounded-full">
+                          +{option.bonus} бонус
+                        </span>
+                      )}
                     </div>
-                    <Button className="bg-amber-400 hover:bg-amber-500 text-white rounded-lg px-4 py-2 text-sm font-semibold">
-                      Купить
-                    </Button>
+                    <div className="flex items-center gap-1 ml-7">
+                      <Icon name="Star" size={16} className="text-amber-500 fill-amber-500" />
+                      <span className="text-sm text-gray-600">{option.stars} звёзд</span>
+                    </div>
                   </div>
+                  <Button className="bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-white rounded-xl px-6 py-3 text-base font-semibold shadow-md">
+                    Купить
+                  </Button>
                 </div>
               ))}
             </div>
