@@ -395,43 +395,31 @@ const Index = () => {
               rel="noopener noreferrer"
               className="block mb-6"
             >
-              <Card className="p-5 bg-gradient-to-br from-yellow-50 via-orange-50 to-yellow-100 border-2 border-yellow-300 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="flex items-center gap-2 bg-teal-100 rounded-full px-3 py-1">
-                    <Icon name="CheckCircle" size={16} className="text-teal-600" />
-                    <span className="text-xs font-medium text-teal-700">Проверенный партнер</span>
+              <Card className="p-4 bg-gradient-to-br from-yellow-50 via-orange-50 to-yellow-100 border-2 border-yellow-300 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer animate-pulse-subtle">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2 bg-teal-100 rounded-full px-2 py-1">
+                    <Icon name="CheckCircle" size={14} className="text-teal-600" />
+                    <span className="text-xs font-medium text-teal-700">Проверенный</span>
                   </div>
-                  <div className="flex gap-1 ml-auto">
+                  <div className="flex gap-0.5">
                     {[1,2,3,4,5].map(i => (
-                      <Icon key={i} name="Star" size={16} className="text-yellow-500 fill-yellow-500" />
+                      <Icon key={i} name="Star" size={14} className="text-yellow-500 fill-yellow-500" />
                     ))}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-3xl">🎰</span>
-                  <h3 className="text-2xl font-bold text-gray-800">Премиум партнер</h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">🎰</span>
+                  <h3 className="text-xl font-bold text-gray-800">Премиум партнер</h3>
                 </div>
 
-                <p className="text-gray-700 font-medium mb-2">
-                  Присоединяйся к проверенной БК платформе
+                <p className="text-sm text-gray-700 mb-3">
+                  🎁 Забери Welcome Bonus и начинай ставить
                 </p>
 
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-2xl">🎁</span>
-                  <p className="text-gray-600">
-                    Забери свой Welcome Bonus и начинай ставить
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-2xl px-6 py-3 font-semibold shadow-md">
-                    <span>Регистрация + Бонус</span>
-                    <Icon name="ArrowRight" size={20} />
-                  </div>
-                  <div className="bg-white px-4 py-2 rounded-xl border-2 border-orange-200 font-bold text-orange-600">
-                    OFFICIAL
-                  </div>
+                <div className="flex items-center gap-2 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-xl px-4 py-2 font-semibold shadow-md justify-center">
+                  <span className="whitespace-nowrap">Регистрация + Бонус</span>
+                  <Icon name="ArrowRight" size={18} />
                 </div>
               </Card>
             </a>
