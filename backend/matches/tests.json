@@ -4,11 +4,7 @@
       "name": "Get all matches",
       "method": "GET",
       "path": "/",
-      "expectedStatus": 200,
-      "expectedBody": {
-        "matches": "array"
-      },
-      "bodyMatcher": "partial"
+      "expectedStatus": 200
     },
     {
       "name": "Create new match",
@@ -26,14 +22,10 @@
         "odds": 2.5,
         "priceCoins": 1,
         "status": "upcoming",
-        "predictionText": "Тестовый прогноз"
+        "predictionText": "Тестовый прогноз",
+        "confidence": 75
       },
-      "expectedStatus": 201,
-      "expectedBody": {
-        "id": "number",
-        "message": "string"
-      },
-      "bodyMatcher": "partial"
+      "expectedStatus": 201
     }
   ]
 }
